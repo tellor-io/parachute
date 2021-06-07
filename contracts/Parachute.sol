@@ -10,7 +10,9 @@ contract Parachute {
   address tellorMaster;
 
   modifier onlyMultis {
-    require(msg.sender == multis);
+    require(
+      msg.sender == multis,
+      "only multis wallet can call this");
     _;
   }
 
@@ -25,12 +27,22 @@ contract Parachute {
   }
 
   function killContract() external onlyMultis {
-    
-
+    selfdestruct(multis);
   }
 
-  function migrateFor(address _user) external onlyMultis {
-    
+  /**
+    * @dev This is function used by the migrator to help
+    *  swap old trb tokens for new ones based on the user's old Tellor balance
+    * @param _destination is the address that will receive tokens
+    * @param _amount is the amount to mint to the user
+    * @param _bypass whether or not to bypass the check if they migrated already
+  */
+  function migrateFor external onlyMultis (
+      address _destination,
+      uint256 _amount,
+      bool _bypass
+  ) external {
+      ITellor(tellorMaster).transfer(_destination, _amount);
   }
 
 
