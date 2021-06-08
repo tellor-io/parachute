@@ -22,21 +22,10 @@ contract Parachute {
     tellor = _tellorMaster;
   }
 
-  function burnBalance(address _user) external onlyMultis {
-
-  }
-
   function killContract() external onlyMultis {
-    selfdestruct(multis);
+    ITellor(tellorMaster).changeDeity(address(0));
   }
 
-  /**
-    * @dev This is function used by the migrator to help
-    *  swap old trb tokens for new ones based on the user's old Tellor balance
-    * @param _destination is the address that will receive tokens
-    * @param _amount is the amount to mint to the user
-    * @param _bypass whether or not to bypass the check if they migrated already
-  */
   function migrateFor external onlyMultis (
       address _destination,
       uint256 _amount,
@@ -76,7 +65,7 @@ contract Parachute {
             abi.encodeWithSelector(0xfc735e99, "") //verify() signature
         );
     require(
-        success && abi.decode(data, (uint256)) < CURRENT_VERSION,
+        !success || abi.decode(data, (uint256)) < CURRENT_VERSION,
         "new tellor is valid"
     );
 
