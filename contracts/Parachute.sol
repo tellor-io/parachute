@@ -46,7 +46,7 @@ contract Parachute is TellorStorage {
       address _destination,
       uint256 _amount
   ) external onlyMultis {
-      ITellor(tellorMaster).transferFrom(msg.sender, _destination, _amount);
+      ITellor(tellorMaster).transfer(_destination, _amount);
   }
 
   /**@dev Enables team to become deity in case of 
