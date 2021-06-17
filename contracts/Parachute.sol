@@ -2,12 +2,14 @@
 pragma solidity 0.8.3;
 
 import "hardhat/console.sol";
-import "ITellor.sol";
+import "contracts/tellor3/ITellor.sol";
+import "contracts/tellor3/TellorStorage.sol";
 
 
-contract Parachute {
+contract Parachute is TellorStorage {
   address private multis;
   address tellorMaster;
+  uint timeBeforeRescue;
 
   modifier onlyMultis {
     require(
@@ -17,20 +19,20 @@ contract Parachute {
   }
 
 
-  constructor(address _tellorMaster) {
-    multis = 0x39e419ba25196794b595b2a595ea8e527ddc9856; //multis address
-    tellor = _tellorMaster;
+  constructor(address _tellorMaster, uint _timeBeforeRescue) {
+    multis = 0x39E419bA25196794B595B2a595Ea8E527ddC9856; //multis address
+    tellorMaster = _tellorMaster;
+    timeBeforeRescue = _timeBeforeRescue;
   }
 
   function killContract() external onlyMultis {
     ITellor(tellorMaster).changeDeity(address(0));
   }
 
-  function migrateFor external onlyMultis (
+  function migrateFor(
       address _destination,
-      uint256 _amount,
-      bool _bypass
-  ) external {
+      uint256 _amount
+  ) external onlyMultis {
       ITellor(tellorMaster).transfer(_destination, _amount);
   }
 
@@ -44,15 +46,13 @@ contract Parachute {
     _rescue();
   }
 
-  function rescueBrokenMining(uint _numSeconds, uint _requestId) external onlyMultis {
+  function rescueBrokenMining() external onlyMultis {
 
-    //get new value count by request id
-    uint index = ITellor(tellorMaster).getNewValueCountbyRequestId(_requestId);
-    //check timestamp of last submit to request ID using value count
-    uint lastSubmissionTime = ITellor(tellorMaster).getTimestampbyRequestIDandIndex(_requestId, index);
-    
+    uint length = TellorStorage(tellorMaster).getNewValueTimestampLength();
+    uint lastSubmissionTime = TellorStorage(tellorMaster).newValueTimestamps(length - 1);
+
     require(
-      _numSeconds > block.timestamp - lastSubmissionTime,
+      timeBeforeRescue < block.timestamp - lastSubmissionTime,
       "mining is active on this requestID"
     );
 
@@ -61,11 +61,11 @@ contract Parachute {
 
   function rescueFailedUpdate() external {
     (bool success, bytes memory data) =
-        address(_newTellor).call(
+        address(tellorMaster).call(
             abi.encodeWithSelector(0xfc735e99, "") //verify() signature
         );
     require(
-        !success || abi.decode(data, (uint256)) < CURRENT_VERSION,
+        !success || abi.decode(data, (uint256)) < 2999,
         "new tellor is valid"
     );
 
