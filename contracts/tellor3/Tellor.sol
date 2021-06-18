@@ -7,12 +7,12 @@ import "./Utilities.sol";
 import "./ITellor.sol";
 import "./SafeMath.sol";
 
- /** 
+/** 
  @author Tellor Inc.
  @title Tellor
  @dev  Main functionality for Tellor Oracle system
 **/
-contract Tellor is TellorStake,Utilities {
+contract Tellor is TellorStake, Utilities {
     using SafeMath for uint256;
 
     /*Events*/
@@ -50,12 +50,12 @@ contract Tellor is TellorStake,Utilities {
 
     /*Storage -- constant only*/
     address immutable extensionAddress;
-    
+
     /*Functions*/
     /**
      * @dev Constructor to set extension address
      * @param _ext Extension address
-    */
+     */
     constructor(address _ext) {
         extensionAddress = _ext;
     }
@@ -65,7 +65,7 @@ contract Tellor is TellorStake,Utilities {
      * @param _requestId being requested to be mined
      * @param _tip amount the requester is willing to pay to be get on queue. Miners
      * mine the ID with the highest tip
-    */
+     */
     function addTip(uint256 _requestId, uint256 _tip) external {
         require(_requestId != 0, "RequestId is 0");
         require(_tip != 0, "Tip should be greater than 0");
@@ -89,7 +89,7 @@ contract Tellor is TellorStake,Utilities {
     /**
      * @dev This function allows users to swap old trb tokens for new ones based
      * on the user's old Tellor balance
-    */
+     */
     function migrate() external {
         _migrate(msg.sender);
     }
@@ -100,7 +100,7 @@ contract Tellor is TellorStake,Utilities {
      * @param _destination is the address that will receive tokens
      * @param _amount is the amount to mint to the user
      * @param _bypass whether or not to bypass the check if they migrated already
-    */
+     */
     function migrateFor(
         address _destination,
         uint256 _amount,
@@ -115,7 +115,7 @@ contract Tellor is TellorStake,Utilities {
      * @param _nonce is the mining solution
      * @param _requestIds are the 5 request ids being mined
      * @param _values are the 5 values corresponding to the 5 request ids
-    */
+     */
     function submitMiningSolution(
         string calldata _nonce,
         uint256[5] calldata _requestIds,
@@ -139,7 +139,7 @@ contract Tellor is TellorStake,Utilities {
      * @dev This is an internal function used by submitMiningSolution and adjusts the difficulty
      * based on the difference between the target time and how long it took to solve
      * the previous challenge otherwise it sets it to 1
-    */
+     */
     function _adjustDifficulty() internal {
         // If the difference between the timeTarget and how long it takes to solve the challenge this updates the challenge
         // difficulty up or down by the difference between the target time and how long it took to solve the previous challenge
@@ -178,7 +178,7 @@ contract Tellor is TellorStake,Utilities {
      * @dev Getter function for the top 5 requests with highest payouts.
      * This function is used within the newBlock function
      * @return _requestIds the top 5 requests ids based on tips or the last 5 requests ids mined
-    */
+     */
     function _getTopRequestIDs()
         internal
         view
@@ -200,7 +200,7 @@ contract Tellor is TellorStake,Utilities {
      * @dev This is an internal function used by the function migrate  that helps to
      *  swap old trb tokens for new ones based on the user's old Tellor balance
      * @param _user is the msg.sender address of the user to migrate the balance from
-    */
+     */
     function _migrate(address _user) internal {
         require(!migrated[_user], "Already migrated");
         _doMint(_user, ITellor(addresses[_OLD_TELLOR]).balanceOf(_user));
@@ -213,8 +213,8 @@ contract Tellor is TellorStake,Utilities {
      * @param _destination is the address that will receive tokens
      * @param _amount is the amount to mint to the user
      * @param _bypass is true if the migrator contract needs to bypass the migrated = true flag
-     *  for users that have already  migrated 
-    */
+     *  for users that have already  migrated
+     */
     function _migrateFor(
         address _destination,
         uint256 _amount,
@@ -231,7 +231,7 @@ contract Tellor is TellorStake,Utilities {
      * assigns a new challenge
      * @param _nonce or solution for the PoW for the current challenge
      * @param _requestIds array of the current request IDs being mined
-    */
+     */
     function _newBlock(string memory _nonce, uint256[5] memory _requestIds)
         internal
     {
@@ -268,9 +268,9 @@ contract Tellor is TellorStake,Utilities {
             _request.finalValues[_timeOfLastNewValueVar] = a[2];
             b[k] = a[2];
             _request.minersByValue[_timeOfLastNewValueVar] = _tblock
-                .minersByValue[k];
+            .minersByValue[k];
             _request.valuesByTimestamp[_timeOfLastNewValueVar] = _tblock
-                .valuesByTimestamp[k];
+            .valuesByTimestamp[k];
             delete _tblock.minersByValue[k];
             delete _tblock.valuesByTimestamp[k];
             _request.requestTimestamps.push(_timeOfLastNewValueVar);
@@ -286,10 +286,9 @@ contract Tellor is TellorStake,Utilities {
         );
         //add timeOfLastValue to the newValueTimestamps array
         newValueTimestamps.push(_timeOfLastNewValueVar);
-        address[5] memory miners =
-            requestDetails[_requestIds[0]].minersByValue[
-                _timeOfLastNewValueVar
-            ];
+        address[5] memory miners = requestDetails[_requestIds[0]].minersByValue[
+            _timeOfLastNewValueVar
+        ];
         //pay Miners Rewards
         _payReward(miners, _previousTime);
         uints[_T_BLOCK]++;
@@ -320,7 +319,7 @@ contract Tellor is TellorStake,Utilities {
      * calculate and pay rewards to miners
      * @param miners are the 5 miners to reward
      * @param _previousTime is the previous mine time based on the 4th entry
-    */
+     */
     function _payReward(address[5] memory miners, uint256 _previousTime)
         internal
     {
@@ -345,7 +344,7 @@ contract Tellor is TellorStake,Utilities {
      * @param _nonce is the mining solution
      * @param _requestIds are the 5 request ids being mined
      * @param _values are the 5 values corresponding to the 5 request ids
-    */
+     */
     function _submitMiningSolution(
         string memory _nonce,
         uint256[5] memory _requestIds,
@@ -423,7 +422,7 @@ contract Tellor is TellorStake,Utilities {
      * @dev This function updates the requestQ when addTip are ran
      * @param _requestId being requested
      * @param _tip is the tip to add
-    */
+     */
     function _updateOnDeck(uint256 _requestId, uint256 _tip) internal {
         Request storage _request = requestDetails[_requestId];
         _request.apiUintVars[_TOTAL_TIP] = _request.apiUintVars[_TOTAL_TIP].add(
@@ -450,7 +449,7 @@ contract Tellor is TellorStake,Utilities {
                 if (_request.apiUintVars[_TOTAL_TIP] > _min || _min == 0) {
                     requestQ[_index] = _request.apiUintVars[_TOTAL_TIP];
                     requestDetails[requestIdByRequestQIndex[_index]]
-                        .apiUintVars[_REQUEST_Q_POSITION] = 0;
+                    .apiUintVars[_REQUEST_Q_POSITION] = 0;
                     requestIdByRequestQIndex[_index] = _requestId;
                     _request.apiUintVars[_REQUEST_Q_POSITION] = _index;
                 }
@@ -467,7 +466,7 @@ contract Tellor is TellorStake,Utilities {
      * valid nonce or allows any solution if 15 minutes or more have passed since last
      * mined values
      * @param _nonce is the mining solution
-    */
+     */
     function _verifyNonce(string memory _nonce) internal view {
         require(
             uint256(
@@ -498,20 +497,20 @@ contract Tellor is TellorStake,Utilities {
      * @dev The tellor logic does not fit in one contract so it has been split into two:
      * Tellor and TellorGetters This functions helps delegate calls to the TellorGetters
      * contract.
-    */
+     */
     fallback() external {
         address addr = extensionAddress;
-        (bool result, ) =  addr.delegatecall(msg.data);
+        (bool result, ) = addr.delegatecall(msg.data);
         assembly {
             returndatacopy(0, 0, returndatasize())
             switch result
-                // delegatecall returns 0 on error.
-                case 0 {
-                    revert(0, returndatasize())
-                }
-                default {
-                    return(0, returndatasize())
-                }
+            // delegatecall returns 0 on error.
+            case 0 {
+                revert(0, returndatasize())
+            }
+            default {
+                return(0, returndatasize())
+            }
         }
     }
 }

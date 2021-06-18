@@ -92,7 +92,6 @@ describe("Tellor Parachute", function() {
     expect(await tellor.balanceOf(acc2.address)).to.equal(0)
     
     //migrate multis token locked in parachute to acc2
-    console.log(2)
     await parachute.connect(multis).migrateFor(acc2.address, 1)
 
     //balance should be updated

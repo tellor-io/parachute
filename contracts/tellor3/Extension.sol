@@ -14,7 +14,7 @@ import "./Utilities.sol";
 **/
 contract Extension is TellorGetters {
     using SafeMath for uint256;
-    
+
     /*Events*/
     //emitted upon dispute tally
     event DisputeVoteTallied(
@@ -28,11 +28,12 @@ contract Extension is TellorGetters {
     event StakeWithdrawRequested(address indexed _sender); //Emits when a staker begins the 7 day withdraw period
     event NewStake(address indexed _sender); //Emits upon new staker
     event NewTellorAddress(address _newTellor);
+
     /*Functions*/
     /**
      * @dev This function allows miners to deposit their stake.
      */
-    function depositStake() external{
+    function depositStake() external {
         _newStake(msg.sender);
         updateMinDisputeFee();
     }
@@ -78,7 +79,7 @@ contract Extension is TellorGetters {
         );
         int256 _tally = disp.tally;
         if (_tally > 0) {
-        //If the vote is not a proposed fork
+            //If the vote is not a proposed fork
             if (disp.isPropFork == false) {
                 //Set the dispute state to passed/true
                 disp.disputeVotePassed = true;
@@ -124,19 +125,18 @@ contract Extension is TellorGetters {
      * @dev Updates the Tellor address after a proposed fork has
      * passed the vote and day has gone by without a dispute
      * @param _disputeId the disputeId for the proposed fork
-    */
+     */
     function updateTellor(uint256 _disputeId) external {
         bytes32 _hash = disputesById[_disputeId].hash;
         uint256 origID = disputeIdByDisputeHash[_hash];
         //this checks the "lastID" or the most recent if this is a multiple dispute case
-        uint256 lastID =
-            disputesById[origID].disputeUintVars[
-                keccak256(
-                    abi.encode(
-                        disputesById[origID].disputeUintVars[_DISPUTE_ROUNDS]
-                    )
+        uint256 lastID = disputesById[origID].disputeUintVars[
+            keccak256(
+                abi.encode(
+                    disputesById[origID].disputeUintVars[_DISPUTE_ROUNDS]
                 )
-            ];
+            )
+        ];
         TellorStorage.Dispute storage disp = disputesById[lastID];
         require(disp.isPropFork, "must be a fork proposal");
         require(
@@ -144,14 +144,17 @@ contract Extension is TellorGetters {
             "update Tellor has already been run"
         );
         require(disp.disputeVotePassed == true, "vote needs to pass");
-        require(disp.disputeUintVars[_TALLY_DATE] > 0, "vote needs to be tallied");
+        require(
+            disp.disputeUintVars[_TALLY_DATE] > 0,
+            "vote needs to be tallied"
+        );
         require(
             block.timestamp - disp.disputeUintVars[_TALLY_DATE] > 1 days,
             "Time for voting for further disputes has not passed"
         );
         disp.disputeUintVars[_FORK_EXECUTED] = 1;
-        address _newTellor =disp.proposedForkAddress;
-        addresses[_TELLOR_CONTRACT] = _newTellor; 
+        address _newTellor = disp.proposedForkAddress;
+        addresses[_TELLOR_CONTRACT] = _newTellor;
         assembly {
             sstore(_EIP_SLOT, _newTellor)
         }
@@ -184,7 +187,7 @@ contract Extension is TellorGetters {
      * The function updates their status/state and status start date so they are locked it so they can't withdraw
      * and updates the number of stakers in the system.
      * @param _staker the address of the new staker
-    */
+     */
     function _newStake(address _staker) internal {
         require(
             balances[_staker][balances[_staker].length - 1].value >=
@@ -200,8 +203,8 @@ contract Extension is TellorGetters {
         );
         uints[_STAKE_COUNT] += 1;
         stakerDetails[_staker] = StakeInfo({
-            currentStatus: 1, 
-            startDate: block.timestamp//this resets their stake start date to now
+            currentStatus: 1,
+            startDate: block.timestamp //this resets their stake start date to now
         });
         emit NewStake(_staker);
     }

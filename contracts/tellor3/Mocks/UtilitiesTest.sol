@@ -9,14 +9,12 @@ import "../Tellor.sol";
  * @dev These are the getter function for the code functions in the
  * Utility contract
  */
-contract UtilitiesTest is Utilities,Tellor{
-
+contract UtilitiesTest is Utilities, Tellor {
     /**
      * @dev Constructor to set extension address
      * @param _ext Extension address
-    */
-    constructor(address _ext) Tellor(_ext){
-    }
+     */
+    constructor(address _ext) Tellor(_ext) {}
 
     /**
      * @dev Gets the top 5 of the array provided
@@ -31,8 +29,11 @@ contract UtilitiesTest is Utilities,Tellor{
         (_max, _index) = _getMax5(requests);
     }
 
-    function testGetMin(uint256[51] memory requests) public pure
-    returns (uint256 _min, uint256 _index){
+    function testGetMin(uint256[51] memory requests)
+        public
+        pure
+        returns (uint256 _min, uint256 _index)
+    {
         (_min, _index) = _getMin(requests);
     }
 }
