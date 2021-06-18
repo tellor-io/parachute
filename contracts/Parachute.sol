@@ -43,7 +43,10 @@ contract Parachute is TellorStorage {
         external
         onlyMultis
     {
-        ITellor(tellorMaster).transfer(_destination, _amount);
+        require(
+            ITellor(tellorMaster).transfer(_destination, _amount),
+            "can't transfer"
+        );
     }
 
     /**@dev Enables team to become deity in case of
