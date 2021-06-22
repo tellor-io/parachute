@@ -10,6 +10,7 @@ contract Parachute is TellorStorage {
   address private multis;
   address tellorMaster;
   uint timeBeforeRescue;
+  uint lastSubmissionTime;
 
   modifier onlyMultis {
     require(
@@ -47,9 +48,18 @@ contract Parachute is TellorStorage {
   }
 
   function rescueBrokenMining() external onlyMultis {
-
-    uint length = TellorStorage(tellorMaster).getNewValueTimestampLength();
-    uint lastSubmissionTime = TellorStorage(tellorMaster).newValueTimestamps(length - 1);
+    for (uint i = 6000; i < 12000; i++) {
+      try TellorStorage(tellorMaster).newValueTimestamps(i) returns (uint timestamp) {
+        lastSubmissionTime = timestamp;
+      } catch {
+        console.log(i);
+        lastSubmissionTime = TellorStorage(tellorMaster).newValueTimestamps(i - 1);
+        break;
+      }
+    }
+    // uint length = TellorStorage(tellorMaster).getNewValueTimestampLength();
+    // console.log(length);
+    // uint lastSubmissionTime = TellorStorage(tellorMaster).newValueTimestamps(length - 1);
 
     require(
       timeBeforeRescue < block.timestamp - lastSubmissionTime,
