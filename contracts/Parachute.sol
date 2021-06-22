@@ -53,6 +53,7 @@ contract Parachute is TellorStorage {
         lastSubmissionTime = timestamp;
       } catch {
         lastSubmissionTime = TellorStorage(tellorMaster).newValueTimestamps(i - 1);
+        break;
       }
     }
     // uint length = TellorStorage(tellorMaster).getNewValueTimestampLength();
