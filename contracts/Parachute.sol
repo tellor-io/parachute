@@ -5,7 +5,6 @@ import "hardhat/console.sol";
 import "contracts/tellor3/ITellor.sol";
 import "contracts/tellor3/TellorStorage.sol";
 
-
 contract Parachute is TellorStorage {
   address private multis;
   address tellorMaster;
@@ -61,30 +60,41 @@ contract Parachute is TellorStorage {
     // console.log(length);
     // uint lastSubmissionTime = TellorStorage(tellorMaster).newValueTimestamps(length - 1);
 
-    require(
-      timeBeforeRescue < block.timestamp - lastSubmissionTime,
-      "mining is active on this requestID"
-    );
+        _rescue();
+    }
 
-    _rescue();
-  }
+    /**@dev Enables team to become deity if mining fails for
+     * amount of time pre-set in constructor
+     */
+    function rescueBrokenMining() external onlyMultis {
+        uint256 length = TellorStorage(tellorMaster)
+        .getNewValueTimestampLength();
+        uint256 lastSubmissionTime = TellorStorage(tellorMaster)
+        .newValueTimestamps(length - 1);
 
-  function rescueFailedUpdate() external {
-    (bool success, bytes memory data) =
-        address(tellorMaster).call(
+        require(
+            timeBeforeRescue < block.timestamp - lastSubmissionTime,
+            "mining is active on this requestID"
+        );
+
+        _rescue();
+    }
+
+    /**@dev Enables team to become deity if an update goes terribly wrong! */
+    function rescueFailedUpdate() external {
+        (bool success, bytes memory data) = address(tellorMaster).call(
             abi.encodeWithSelector(0xfc735e99, "") //verify() signature
         );
-    require(
-        !success || abi.decode(data, (uint256)) < 2999,
-        "new tellor is valid"
-    );
+        require(
+            !success || abi.decode(data, (uint256)) < 2999,
+            "new tellor is valid"
+        );
 
-    _rescue();
+        _rescue();
+    }
 
-  }
-
-  //resign control to multis
-  function _rescue() internal {
-    ITellor(tellorMaster).changeDeity(multis);
-  }
+    /**@dev (internal) restore deity to multis */
+    function _rescue() internal {
+        ITellor(tellorMaster).changeDeity(multis);
+    }
 }

@@ -64,7 +64,7 @@ contract TellorStorage {
     //Migration storage
     mapping(address => bool) public migrated;
 
-    function getNewValueTimestampLength() external view returns(uint256) {
+    function getNewValueTimestampLength() external view returns (uint256) {
         return newValueTimestamps.length;
     }
 }
