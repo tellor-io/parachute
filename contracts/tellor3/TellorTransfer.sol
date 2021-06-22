@@ -28,7 +28,7 @@ contract TellorTransfer is TellorStorage, TellorVariables {
      * @param _user address of party with the balance
      * @param _spender address of spender of parties said balance
      * @return Returns the remaining allowance of tokens granted to the _spender from the _user
-    */
+     */
     function allowance(address _user, address _spender)
         public
         view
@@ -43,7 +43,7 @@ contract TellorTransfer is TellorStorage, TellorVariables {
      * @param _user address of user
      * @param _amount to check if the user can spend
      * @return true if they are allowed to spend the amount being checked
-    */
+     */
     function allowedToTrade(address _user, uint256 _amount)
         public
         view
@@ -140,7 +140,7 @@ contract TellorTransfer is TellorStorage, TellorVariables {
      * @param _from The address holding the tokens being transferred
      * @param _to The address of the recipient
      * @param _amount The amount of tokens to be transferred
-    */
+     */
     function transferFrom(
         address _from,
         address _to,
@@ -162,7 +162,7 @@ contract TellorTransfer is TellorStorage, TellorVariables {
      * @param _from address to transfer from
      * @param _to address to transfer to
      * @param _amount to transfer
-    */
+     */
     function _doTransfer(
         address _from,
         address _to,
@@ -175,7 +175,7 @@ contract TellorTransfer is TellorStorage, TellorVariables {
             "Should have sufficient balance to trade"
         );
         uint128 previousBalance = uint128(balanceOf(_from));
-        uint128 _sizedAmount  = uint128(_amount);
+        uint128 _sizedAmount = uint128(_amount);
         _updateBalanceAtNow(_from, previousBalance - _sizedAmount);
         previousBalance = uint128(balanceOf(_to));
         require(
@@ -190,12 +190,12 @@ contract TellorTransfer is TellorStorage, TellorVariables {
      * @dev Helps swap the old Tellor contract Tokens to the new one
      * @param _to is the adress to send minted amount to
      * @param _amount is the amount of TRB to send
-    */
+     */
     function _doMint(address _to, uint256 _amount) internal {
         require(_amount != 0, "Tried to mint non-positive amount");
         require(_to != address(0), "Receiver is 0 address");
         uint128 previousBalance = uint128(balanceOf(_to));
-        uint128 _sizedAmount  = uint128(_amount);
+        uint128 _sizedAmount = uint128(_amount);
         require(
             previousBalance + _sizedAmount >= previousBalance,
             "Overflow happened"
@@ -222,7 +222,7 @@ contract TellorTransfer is TellorStorage, TellorVariables {
             "Should have sufficient balance to trade"
         );
         uint128 previousBalance = uint128(balanceOf(_from));
-        uint128 _sizedAmount  = uint128(_amount);
+        uint128 _sizedAmount = uint128(_amount);
         require(
             previousBalance - _sizedAmount <= previousBalance,
             "Overflow happened"
@@ -253,8 +253,9 @@ contract TellorTransfer is TellorStorage, TellorVariables {
                 })
             );
         } else {
-            TellorStorage.Checkpoint storage oldCheckPoint =
-                checkpoints[checkpoints.length - 1];
+            TellorStorage.Checkpoint storage oldCheckPoint = checkpoints[
+                checkpoints.length - 1
+            ];
             oldCheckPoint.value = _value;
         }
     }
