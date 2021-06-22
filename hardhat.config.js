@@ -36,8 +36,11 @@ module.exports = {
         blockNumber: 12600000
       }
     }
-  }
+  },
 
+  mocha: {
+    timeout: 50000
+  }
   
 };
 
