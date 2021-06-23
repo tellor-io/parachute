@@ -107,14 +107,15 @@ describe("Tellor Parachute", function() {
     }
     //expect pre-emptive rescue fails, mining still works
     await expect(
-      parachute.connect(multis).rescueBrokenMining(),
+      parachute.connect(multis).rescueBrokenMining(6501),
       "parachute took over from working mining system"
     ).to.be.reverted
 
     //wait 2 weeks, rescue suceeds
     await network.provider.send("evm_increaseTime", [2*weekInSeconds])
     await network.provider.send("evm_mine")
-    await parachute.connect(multis).rescueBrokenMining()
+    let index = 0
+    await parachute.connect(multis).rescueBrokenMining(6501) //length of array at the time
 
 
   })

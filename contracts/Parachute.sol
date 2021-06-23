@@ -47,22 +47,22 @@ contract Parachute is TellorStorage {
     _rescue();
   }
 
-  function rescueBrokenMining() external onlyMultis {
-    for (uint i = 6000; i < 12000; i++) {
-      try TellorStorage(tellorMaster).newValueTimestamps(i) returns (uint timestamp) {
-        lastSubmissionTime = timestamp;
-      } catch {
-        lastSubmissionTime = TellorStorage(tellorMaster).newValueTimestamps(i - 1);
-        break;
-      }
+  function rescueBrokenMining(uint index) external onlyMultis {
+    bool pass;
+    try TellorStorage(tellorMaster).newValueTimestamps(index + 1) {
+      pass = false;
+    } catch {
+      lastSubmissionTime = TellorStorage(tellorMaster).newValueTimestamps(index);
+      pass = true;
     }
-    // uint length = TellorStorage(tellorMaster).getNewValueTimestampLength();
-    // console.log(length);
-    // uint lastSubmissionTime = TellorStorage(tellorMaster).newValueTimestamps(length - 1);
+
+    require(
+      pass,
+      "newer timestamps available, call with higher index");
 
     require(
       timeBeforeRescue < block.timestamp - lastSubmissionTime,
-      "mining is active on this requestID"
+      "mining is active"
     );
 
     _rescue();
