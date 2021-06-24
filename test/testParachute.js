@@ -82,32 +82,32 @@ describe("Tellor Parachute", function() {
 
   });
 
-  it("rescue broken mining", async function() {
+  it("rescue broken data reporting", async function() {
 
     let weekInSeconds = 86400*7
     let v;
     let i = 0
-    let miners = [m1, m2, m3, m4, m5, m6, m7] = await ethers.getSigners()
+    let reporters = [r1, r2, r3, r4, r5, r6, r7] = await ethers.getSigners()
 
     while (i < 7) {
-    //become a miner and submit a value
-    miner = miners[i]
-    await tellor.theLazyCoon(miner.address, BigInt(500)*BigInt(1E18)) //500 tokens
-    await tellor.connect(miner).depositStake()
+    //become a reporter and submit a value
+    reporter = reporters[i]
+    await tellor.theLazyCoon(reporter.address, BigInt(500)*BigInt(1E18)) //500 tokens
+    await tellor.connect(reporter).depositStake()
     v = await tellor.getNewCurrentVariables();
-    await tellor.connect(miner).testSubmitMiningSolution(
+    await tellor.connect(reporter).testSubmitMiningSolution(
         "nonce",
         v["1"],
         ["1000","1000","1000","1000","1000"],
         {
-          from: miner.address,
+          from: reporter.address,
           value: "0",
         })
     i++
     }
     //expect pre-emptive rescue fails, mining still works
     await expect(
-      parachute.connect(multis).rescueBrokenMining(6501),
+      parachute.connect(multis).rescueBrokenDataReporting(6501),
       "parachute took over from working mining system"
     ).to.be.reverted
 
@@ -115,7 +115,7 @@ describe("Tellor Parachute", function() {
     await network.provider.send("evm_increaseTime", [2*weekInSeconds])
     await network.provider.send("evm_mine")
     let index = 0
-    await parachute.connect(multis).rescueBrokenMining(6501) //length of array at the time
+    await parachute.connect(multis).rescueBrokenDataReporting(6501) //length of array at the time
 
 
   })
