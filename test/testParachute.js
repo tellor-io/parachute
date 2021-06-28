@@ -64,6 +64,9 @@ describe("Tellor Parachute", function() {
       "parachute took over b/c of regular token holder"
       ).to.be.reverted
    
+      let deity = '0x5fc094d10c65bc33cc842217b2eccca0191ff24148319da094e540a559898961'
+      let origDeity = await tellor.getAddressVars(deity)
+      
     //mint total supply to some address
     await tellor.theLazyCoon(acc1.address, BigInt(2E6)*BigInt(1E18)) //2mil tokens
     let ts = await tellor.totalSupply()
@@ -77,13 +80,26 @@ describe("Tellor Parachute", function() {
 
     await parachute.rescue51PercentAttack(acc1.address)
 
+    let newDeity = await tellor.getAddressVars(deity)
+    
+
+    expect(newDeity == multis, "New deity is not multis")
     await tellor.connect(multis).changeDeity(ethers.constants.AddressZero)
+
+    let removeDeity = await tellor.getAddressVars(deity)
+    
+
+    expect(newDeity == ethers.constants.AddressZero, "New deity is not the zero address")
+
 
 
   });
 
   it("rescue broken data reporting", async function() {
 
+    let deity = '0x5fc094d10c65bc33cc842217b2eccca0191ff24148319da094e540a559898961'
+    let origDeity = await tellor.getAddressVars(deity)
+    
     let weekInSeconds = 86400*7
     let v;
     let i = 0
@@ -111,11 +127,17 @@ describe("Tellor Parachute", function() {
       "parachute took over from working mining system"
     ).to.be.reverted
 
-    //wait 2 weeks, rescue suceeds
+    //wait 2 weeks, rescue succeeds
     await network.provider.send("evm_increaseTime", [2*weekInSeconds])
     await network.provider.send("evm_mine")
     let index = 0
     await parachute.connect(multis).rescueBrokenDataReporting(6501) //length of array at the time
+
+
+    let newDeity = await tellor.getAddressVars(deity)
+    
+
+    expect(newDeity == multis, "New deity is not multis")
 
 
   })
