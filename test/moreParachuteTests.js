@@ -61,6 +61,7 @@ describe("Tellor Parachute", function() {
   it("rescue failed update", async function() {
     let tellorContract = '0x0f1293c916694ac6af4daa2f866f0448d0c2ce8847074a7896d397c961914a08'
     let origAdd = await tellor.getAddressVars(tellorContract)
+    console.log("original tellor address",  origAdd)
     
     await expect(origAdd == ethers.constants.AddressZero, "Tellor's address did not start at the zero address") 
     
@@ -72,7 +73,7 @@ describe("Tellor Parachute", function() {
     //read tellor contract adddress
     
     let newAdd = await tellor.getAddressVars(tellorContract)
-    
+    console.log("new tellor address", newAdd)
     await expect(newAdd == newTellor.address, "Tellor's address was not updated") 
   })
 
