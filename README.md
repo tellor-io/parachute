@@ -6,4 +6,4 @@ The Parachute is the new tellor deity, replacing the Tellor team's mutlis accoun
 * Broken mining (now mining events for a pre-set amount of time)
 * Tellor updates to something non-functional (the zero address)
 
-Also includes custom migration logic and the ability to send deity to zero address, rendering the Parachute useless.
+Also includes custom migration logic and the ability to send deity to the zero address, rendering the Parachute useless.

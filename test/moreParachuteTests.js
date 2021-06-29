@@ -59,12 +59,22 @@ beforeEach(async function() {
 describe("Tellor Parachute", function() {
 
   it("rescue failed update", async function() {
-
+    let tellorContract = '0x0f1293c916694ac6af4daa2f866f0448d0c2ce8847074a7896d397c961914a08'
+    let origAdd = await tellor.getAddressVars(tellorContract)
+    console.log("original tellor address",  origAdd)
+    
+    await expect(origAdd == ethers.constants.AddressZero, "Tellor's address did not start at the zero address") 
+    
     //throw deity to parachute 
     await parachute.connect(multis).rescueFailedUpdate()
 
     //get it back!
     await tellor.connect(multis).changeTellorContract(newTellor.address)
+    //read tellor contract adddress
+    
+    let newAdd = await tellor.getAddressVars(tellorContract)
+    console.log("new tellor address", newAdd)
+    await expect(newAdd == newTellor.address, "Tellor's address was not updated") 
   })
 
   it("kill contract", async function() {
@@ -72,7 +82,7 @@ describe("Tellor Parachute", function() {
     //kill the contract (change tellor deity to 0 address)
     await parachute.connect(multis).killContract()
 
-    //cant change tellor contract if deity is 0 address
+    //can't change tellor contract if deity is 0 address
     await expect(
       tellor.connect(multis).changeTellorContract(newTellor.address),
       "deity is 0 address but multis could still change contract"
@@ -88,7 +98,7 @@ describe("Tellor Parachute", function() {
     //create signer
     let acc2 = await ethers.getSigner()
 
-    //acc2 doesnet have a balance yet
+    //acc2 does not have a balance yet
     expect(await tellor.balanceOf(acc2.address)).to.equal(0)
     
     //migrate multis token locked in parachute to acc2
