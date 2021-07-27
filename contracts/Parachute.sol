@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity 0.8.3;
 
-import "hardhat/console.sol";
 import "contracts/tellor3/ITellor.sol";
 import "contracts/tellor3/TellorStorage.sol";
 
@@ -49,11 +48,8 @@ contract Parachute is TellorStorage {
   function rescueBrokenDataReporting() external {
     bytes32 _newChallenge;
     (_newChallenge,,,) = ITellor(tellorMaster).getNewCurrentVariables();
-    console.log(1);
     if(_newChallenge == challenge){
-      console.log(2);
       if(block.timestamp - challengeUpdate > 7 days){
-        console.log(3);
         ITellor(tellorMaster).changeDeity(multis);
       }
     }
@@ -72,7 +68,11 @@ contract Parachute is TellorStorage {
         address(tellorMaster).call(
             abi.encodeWithSelector(0xfc735e99, "") //verify() signature
         );
-    require(!success || abi.decode(data, (uint256)) < 2999,"new tellor is valid");
+    uint _val;
+    if(data.length > 0){
+      _val = abi.decode(data, (uint256));
+    }
+    require(!success || _val < 2999,"new tellor is valid");
     ITellor(tellorMaster).changeDeity(multis);
   }
 }
