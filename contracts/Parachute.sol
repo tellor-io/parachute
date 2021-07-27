@@ -1,39 +1,20 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity 0.8.3;
 
-import "hardhat/console.sol";
 import "contracts/tellor3/ITellor.sol";
 import "contracts/tellor3/TellorStorage.sol";
 
-
 contract Parachute is TellorStorage {
-  address private multis;
-  address tellorMaster;
-  uint timeBeforeRescue;
-  uint lastSubmissionTime;
-
-  modifier onlyMultis {
-    require(
-      msg.sender == multis,
-      "only multis wallet can call this");
-    _;
-  }
-
-  /**
-   * @param _tellorMaster is TellorMaster address
-   * @param _timeBeforeRescue is the timeframe before the key can be reinstated because
-   * data is not being added on-chain
-   */
-  constructor(address _tellorMaster, uint _timeBeforeRescue) {
-    multis = 0x39E419bA25196794B595B2a595Ea8E527ddC9856; //multis address
-    tellorMaster = _tellorMaster;
-    timeBeforeRescue = _timeBeforeRescue;
-  }
+  address constant tellorMaster = 0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0;
+  address constant multis = 0x39E419bA25196794B595B2a595Ea8E527ddC9856;
+  bytes32 challenge;
+  uint256 challengeUpdate;
 
   /**
    * @dev Use this function to end parachutes ability to reinstate Tellor's admin key
    */
-  function killContract() external onlyMultis {
+  function killContract() external {
+    require(msg.sender == multis,"only multis wallet can call this");
     ITellor(tellorMaster).changeDeity(address(0));
   }
 
@@ -42,11 +23,9 @@ contract Parachute is TellorStorage {
    * @param _destination is the destination adress to migrate tokens to
    * @param _amount is the amount of tokens to migrate
    */
-  function migrateFor(
-      address _destination,
-      uint256 _amount
-  ) external onlyMultis {
-      ITellor(tellorMaster).transfer(_destination, _amount);
+  function migrateFor(address _destination,uint256 _amount) external {
+    require(msg.sender == multis,"only multis wallet can call this");
+    ITellor(tellorMaster).transfer(_destination, _amount);
   }
 
   /**
@@ -59,38 +38,26 @@ contract Parachute is TellorStorage {
       ITellor(tellorMaster).balanceOf(_tokenHolder) * 100 / ITellor(tellorMaster).totalSupply() >= 51,
       "attacker balance is < 51% of total supply"
     );
-
-    _rescue();
+    ITellor(tellorMaster).changeDeity(multis);
   }
 
   /**
    * @dev Allows the TellorTeam to reinstate the admin key if a long time(timeBeforeRescue)
    * has gone by without a value being added on-chain
-   * @param index is the index in the newValueTimestamps array to check if it is  the last in
-   * the array: It is used to pull the last time a value was added on-chain to ensure the system
-   * is alive
    */
-  function rescueBrokenDataReporting(uint index) external {
-    bool pass;
-    try TellorStorage(tellorMaster).newValueTimestamps(index + 1) {
-      pass = false;
-    } catch {
-      lastSubmissionTime = TellorStorage(tellorMaster).newValueTimestamps(index);
-      pass = true;
+  function rescueBrokenDataReporting() external {
+    bytes32 _newChallenge;
+    (_newChallenge,,,) = ITellor(tellorMaster).getNewCurrentVariables();
+    if(_newChallenge == challenge){
+      if(block.timestamp - challengeUpdate > 7 days){
+        ITellor(tellorMaster).changeDeity(multis);
+      }
     }
-
-    require(
-      pass,
-      "newer timestamps available, call with higher index");
-
-    require(
-      timeBeforeRescue < block.timestamp - lastSubmissionTime,
-      "mining is active"
-    );
-
-    _rescue();
+    else{
+      challenge = _newChallenge;
+      challengeUpdate = block.timestamp;
+    }
   }
-
 
   /**
    * @dev Allows the Tellor community to reinstate the admin key if tellor is updated
@@ -101,19 +68,11 @@ contract Parachute is TellorStorage {
         address(tellorMaster).call(
             abi.encodeWithSelector(0xfc735e99, "") //verify() signature
         );
-    require(
-        !success || abi.decode(data, (uint256)) < 2999,
-        "new tellor is valid"
-    );
-
-    _rescue();
-
-  }
-
-  /**
-   *@dev This internal function allows the rescue functions to to Tellor's multi sig wallet
-   */
-  function _rescue() internal {
+    uint _val;
+    if(data.length > 0){
+      _val = abi.decode(data, (uint256));
+    }
+    require(!success || _val < 2999,"new tellor is valid");
     ITellor(tellorMaster).changeDeity(multis);
   }
 }
