@@ -8,6 +8,12 @@ The Parachute is the new tellor deity, replacing the Tellor team's mutlis accoun
 
 Also includes custom migration logic and the ability to send deity to the zero address, rendering the Parachute useless.
 
+## Deployment 
+
+Live on mainnet: 
+
+[https://etherscan.io/address/0x83eB2094072f6eD9F57d3F19f54820ee0BaE6084](https://etherscan.io/address/0x83eB2094072f6eD9F57d3F19f54820ee0BaE6084)
+
 
 ## Setting up and testing
 
